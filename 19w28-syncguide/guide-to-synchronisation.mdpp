@@ -1,0 +1,104 @@
+Rishin's guide to thread synchronisation - Part 1: Understanding the problem
+============================================================================
+
+When working in a multi-threaded environment, often access to a common memory location is shared between threads. In such cases it is necessary to synchronise the access of that shared memory, otherwise memory inconsistency errors appear. This article primarily deals with alternative strategies for synchronisation and their relative performances.
+
+When we talk about accessing a memory region shared between threads it by default excludes stack and thread-local variables since these cannot be shared. Only data-segment and heap variables need to be synchronised. In ISO-C standard terms stack and thread-local would have automatic and thread storage duration, while data-segment and heap would have static and allocated storage duratin. See C11 standard (ISO/IEC 9899:2011): Section 6.2.4 for details.
+
+Access to memory means either *read* or *write*, however strategies for synchronisation do not correlate directly to these methods. Mainly three strategies for synchronisation exists:
+
+Read-only synchronisation
+: A variable which is read-only cannot lead to memory coherency issues since its state is never modified. An example would be usages of the immutability pattern where a variable is initialised once in the begining and never modified. Due to the straightforward nature of this strategy, this method will not be covered in detail.
+
+Write-only synchronisation
+: For this case the variable is blindly modified with little regards to its previous state. Common example where this kind of synchronisation might be necessary would be statistics counters which are constantly incremented or decremented by multiple threads.
+
+Lock based synchronisation
+: For all complex cases where the state of the common memory needs to be checked before modification we need to use a system provided locking mechanism. This also applies to cases where one common memory variable needs to be checked before modifying a different common memory variable.
+
+
+Memory consistency for write-only cases
+---------------------------------------
+
+Consider a simple case where a variable is incremented and decremented at the same time in two separate threads. We have a static storage duration variable as follows:
+
+!INCLUDECODE "sync_wo.c" (c), 18:18
+
+The naive incrementer and decrementer routines are as follows:
+
+!INCLUDECODE "sync_wo.c" (c), 22:41
+
+We start these two in two separate threads:
+
+!INCLUDECODE "sync_wo.c" (c), 148:190
+
+Note that `THREAD_COUNT` variable is macro with value `2` (any even number for this example should work). From a naive point of view, the `shared_value` should be incremented and decremeted the same number of time (`loop_count` number of times). However this is the output we get from the program:
+
+```
+$ gcc -DBUILD_UNSAFE sync_wo.c -lpthread -o tester
+$ ./tester 100000
+Value before starting: 100
+Value after ending: -22178
+```
+
+The error we get is completely random, and different runs will provide different values. Note that we need to pass reasonably high parameter for `loop_count` as `100000` to see an error. This will be explained later in details.
+
+To understand the incosistency we need to see the assembly dump of our incrementer and decrementer functions: 
+
+The single expression `shared_value++` in assembly translates to:
+
+```
+  400797:	8b 05 c7 08 20 00    	mov    0x2008c7(%rip),%eax
+  40079d:	83 c0 01             	add    $0x1,%eax
+  4007a0:	89 05 be 08 20 00    	mov    %eax,0x2008be(%rip)
+```
+And the `shared_value--` translates to:
+
+```
+  4007cf:	8b 05 8f 08 20 00    	mov    0x20088f(%rip),%eax        
+  4007d5:	83 e8 01             	sub    $0x1,%eax
+  4007d8:	89 05 86 08 20 00    	mov    %eax,0x200886(%rip)
+```  
+
+In both cases the first `mov` instruction loads the value into register `%eax`. After that the `add` or `sub` instruction either increments or decrements. The second `mov` instrunctions stores it back. So the sequence of operations is:
+
+1. Load value from memory to register
+2. Increment / decrement register
+3. Store value to memory from register
+
+This three step process is precisely what causes the issue. Two possible scenarios might be their based on single-core or multi-core execution.
+
+#### Scenario 1: Single core based execution with pre-emption
+
+Consider the following sequence of events:
+
+T1-1. Thread 1 loads value (let's say 100)
+Thread 1 get's preempted due to process scheduling
+T2-1. Thread 2 loads value (value is still 100)
+T2-2. Thread 2 decrements value
+T2-3. Thread 2 stores value (value stored is 99)
+Thread 1 is scheduled back in
+T1-2. Thread 1 increments the value
+T1-3. Thread 1 stores back the value (value stored is 101)
+
+The outcome value should have been 100, but due to pre-emptive scheduling we missed have incosistent behaviour.
+
+#### Scenario 2: Multi core based execution
+
+With multi core you can just have simple interleaving to have inconsistent behaviour
+
+T1-1. Thread 1 loads value (let's say 100)
+T2-1. Thread 2 loads value (value is still 100)
+T1-2. Thread 1 increments the value (register value 101)
+T2-2. Thread 2 decrements value (register value 99)
+T1-3. Thread 1 stores back the value (value stored is 101)
+T2-3. Thread 2 stores value (value stored is 99)
+
+
+
+
+
+
+
+
+
