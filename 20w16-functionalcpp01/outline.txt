@@ -1,0 +1,41 @@
+Day 1
+
+C++ as functional programming language.
+
+### The problem with declarative programming
+
+The problem with declarative programming
+
+```Code with - multiple files, count lowercase words frequency 
+
+Extension 1 - Consider words of even length
+Extension 2 - Also need function for odd length
+
+Why not functions?
+
+Extension 3 - Same function for words with even length
+
+
+### Functional programming
+
+Wiki definition / FAQ for comp.lang.functiona
+
+Our interpretation
+
+```Same problem again
+Extension 1, 2, 3
+
+### Why iterators?
+
+Iterators are a design pattern of functional programming.
+
+What all are iteratble
+
+collections, streams, json
+
+
+### What about performance?
+
+Performance cosideration
+
+### Benefits of functional programming
