@@ -1,41 +1,123 @@
 Day 1
 
-C++ as functional programming language.
+### C++ as functional programming language.
+
+* Functional programming is a programming paradigm born in academia in 1950
+* Never that popular as imperative
+* Imperative languages are based on assembly
+* Future merge / functional overtaking
+* Imperative progrs adopting functional
+
+* People view C++ as functional since CPP11 - Lambdas, high order functions, type-inference
+* High order supported since STL. Function objects in TR1.
+* Obscure feature like pattern matching since templates.
+* CPP20 ranges makes it awesome.
+* Proposal for async, executors in upcoming C++23
+
+* Prerequisite, basic C++ knowledge and familarity with templates
+* Basic usage of algorithm
 
 ### The problem with declarative programming
 
 The problem with declarative programming
 
-```Code with - multiple files, count lowercase words frequency 
+* Consider the problem - multiple files, count lowercase words frequency 
 
-Extension 1 - Consider words of even length
-Extension 2 - Also need function for odd length
+>> Code
 
-Why not functions?
+* Praise code - Problem of changing code in sofware industry
+* Extension 1 - Consider words of even length
 
-Extension 3 - Same function for words with even length
+>> Code
+
+* Criticise code - But also compliment
+* Extension 2 - Also need function for odd length (with constraints)
+
+>> Code
+
+* Why not functions?
+	* Modulraisation happens in response to requirements rather than foresight
+	* Refactoring in industry is a privelege
 
 
-### Functional programming
+### Solving the problem with Functional programming
 
-Wiki definition / FAQ for comp.lang.functiona
+* Equivalent solution in functional programming
 
-Our interpretation
+>> Code
 
-```Same problem again
-Extension 1, 2, 3
+* Explanation of code
 
-### Why iterators?
+* Reader's though - You're modularising since you know problems to come?
+	* Response: No functional style forces you to code that way
 
-Iterators are a design pattern of functional programming.
+* Continuning to extension 1
 
-What all are iteratble
+>> Code
 
-collections, streams, json
+* Explain 
+
+* Plus points of the functional way
+	* No additional cyclomatic complexity
+	* Linear continutation instead of nesting
+
+* Continuning to extension 2
+
+>> Code
+
+* Why breaking the original function doesn't violate requirement
+
+* Hope the reader is convinced
+
+
+### Functional programming and iterable items
+
+* Till now no forma defn. Formal defn - Wiki definition / FAQ for comp.lang.functiona
+* Our interpretation - It's a different style of code.
+* Current case - how to write for iterable objects
+* Iterators are a design pattern of functional programming.
+* What all are iteratble
+>> collections
+>> streams
+>> json
+
+* Comparison to object oriented pattern
+* The iterator object in-itself is object oriented (operators, parameterise value)
+* Processing of iteraable, rather than the iterable which matters
+>> Object oriented code
+* Possible co-existence
 
 
 ### What about performance?
 
-Performance cosideration
+* Till now feigned igonrance about performance
+* There might be a burning questions in readr
+* Let's do a performance comparison - 1 billion numbers, exclude divisible by 3 or 7, multiply by 10,  bernstein hash
+
+>> Code
+
+* Reader - optimisations cheat
+	* Response - yes it's a cheat.
+	* Reader should not be biased against.
+	* Actual functional code won't have these problems
+	* CPP20 ranges solves all of this
+* Conitnue with output
+
+>> CPU profile
+
+* Not that bad
+
+>> Memory profile
+
+* Clearly bad
+* Will be solved
 
 ### Benefits of functional programming
+
+* Code brevity, readability, modularisation
+* Enforce code reuse, standard library reuse
+* Synchronisation
+
+### References
+
+TODO
