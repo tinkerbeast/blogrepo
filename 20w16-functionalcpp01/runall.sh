@@ -31,6 +31,16 @@ for param in 1000 10000 100000 1000000 10000000; do
     /usr/bin/time ./perf_functional.out 0 $param 2> >(tee -a  perf_functional.csv)
 done
 
+g++ -std=c++20 -O2 -g ch01_perf_ranges.cpp -o perf_ranges.out
+echo "param,real,user,sys,maxmem" > perf_ranges.csv
+for param in 1000 10000 100000 1000000 10000000; do
+    echo -n "$param," >> perf_ranges.csv
+    /usr/bin/time ./perf_ranges.out 0 $param 2> >(tee -a  perf_ranges.csv)
+done
+
+
+set -x
+
 ./analyse_time.py --name perf *.csv
 ./analyse_time.py --logx --logy --name perflogscale *.csv
 
