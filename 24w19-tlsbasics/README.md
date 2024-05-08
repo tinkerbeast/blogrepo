@@ -277,3 +277,136 @@ Appendix 3: TODO TLS security theoretical
 * Key generation
 
 
+TLS basics 2
+==========
+
+RSA maths
+-------------
+### RSA parameters
+```
+prime1: p
+prime2: q
+modulus: n = p * q
+publicExponent: e    // encryption key
+privateExponent: d   // decryption key
+// following parameters are kept for easier computation - can be ignored.
+exponent1 = d*p
+exponent2 = d*q
+coefficient = q**-1 mod p
+```
+Parameter constraints:
+```
+e is prime
+e*d ≡ 1 mod φ(n)  // e*d = k*φ(n) + 1        ------------ i
+e < φ(n) // to avoid bounds cases
+φ(n) % e != 0  // to avoid trivial cases
+```
+NOTE: φ(n) is the totient function. In our case φ(n) = (p-1)*(q-1)
+
+### Euler Fermat theorem
+```
+If y is a positive integer, and gcd(x,y)=1, then x**φ(y) ≡ 1 mod y   ------ ii
+Note that, x**φ(y) = k.y + 1
+```
+### Encryption decryption
+```
+M               // to be encrypted
+We must make M relatively prime to n   ---------- iii
+
+R = M**e mod n  // is the encrypted message
+
+// How to decrypt
+R**d    := (M**e)**d
+        := M**(e.d)
+        := M**(k*φ(n) + 1)     --------- i
+        := M**(k*φ(n)) * M
+        := (M**φ(n))**k * M
+        := (1 mod n)**k * M    ---------- ii & iii
+```
+
+### RSA parameter calculations
+
+Proof that e*d ≡ 1 mod φ(n) can be calculated fast enough:
+```
+e = (k*φ(n) + 1) / d
+This can be solved using -
+https://math.stackexchange.com/questions/497327/find-point-on-line-that-has-integer-coordinates
+https://www.geeksforgeeks.org/find-integer-point-line-segment-given-two-ends/
+```
+TODO: Proof that prime numbers can be generated fast enough.
+
+### Summary
+>>> Parameter are: modulus: n = p * q,  publicExponent: e, privateExponent: d
+>>> If message is M: `M**e` encrypts, `(M**e)**d` decrypts
+
+
+RSA private key
+-------------------
+```
+openssl genrsa -out example-private.key 2048
+openssl rsa -in example-private.key -text -noout
+```
+
+
+MTM revision
+-----------------
+![alice-bob-eve](https://pajhome.org.uk/crypt/rsa/problem.gif)
+>.
+>.
+>.
+>.
+>.
+>.
+>.
+
+### Certificates
+
+```
+openssl req -x509 -sha256 -days 365 -newkey rsa:2048 -nodes -keyout ca-root.key -out ca-root.cert
+openssl x509 -in ca-root.cert -text -noout
+```
+
+
+Master secret and moving on to bulk encryption
+----------------------------------------------------------
+
+### Pre-master Secret, master secret
+
+* Diffie Hellman pre-master secret
+* RSA pre-master secret (sent over Handshake/ClientKeyExchange. See https://datatracker.ietf.org/doc/html/rfc5246#section-7.4.7.1)
+
+master secret - A 48-byte secret shared between the two peers in the connection.
+
+[Pre-master secret conversion to master secret](https://datatracker.ietf.org/doc/html/rfc5246#section-8.1)
+
+### Initialization Vector (IV)
+TODO
+
+### Change cipher spec protocol
+https://datatracker.ietf.org/doc/html/rfc5246#section-7.1
+
+
+RSA key exchange
+----------------------
+```
+openssl s_server -no_tls1_3 -cert ca-root.cert -key ca-root.key -cipher AES256-SHA256
+openssl s_client -no_tls1_3 -cipher AES256-SHA256 -connect 127.0.0.1:4433
+```
+
+
+Adding to the confusion
+-----------------------------
+```
+// TLS_DHE_RSA_WITH_AES_256_GCM_SHA384
+openssl s_server -no_tls1_3 -cert ca-root.cert -key ca-root.key -cipher DHE-RSA-AES256-GCM-SHA384
+openssl s_client -no_tls1_3 -cipher DHE-RSA-AES256-GCM-SHA384 -connect 127.0.0.1:4433
+
+// TLS_DHE_PSK_WITH_AES_256_GCM_SHA384
+openssl s_server -no_tls1_3 -cert ca-root.cert -key ca-root.key -cipher DHE-PSK-AES256-GCM-SHA384 -psk abcd1234
+openssl s_client -no_tls1_3 -cipher DHE-PSK-AES256-GCM-SHA384 -connect 127.0.0.1:4433 -psk abcd1234
+
+// TLS_RSA_PSK_WITH_AES_256_GCM_SHA384
+openssl s_server -no_tls1_3 -cert ca-root.cert -key ca-root.key -cipher RSA-PSK-AES256-GCM-SHA384 -psk abcd1234
+openssl s_client -no_tls1_3 -cipher RSA-PSK-AES256-GCM-SHA384 -connect 127.0.0.1:4433 -psk abcd1234
+```
+
