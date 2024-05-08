@@ -11,6 +11,12 @@ OSI stack and handshake
 * [Handshake protocol](https://datatracker.ietf.org/doc/html/rfc5246#section-7)
 * [Record protocol](https://datatracker.ietf.org/doc/html/rfc5246#section-6)
 
+Sub-protocols:
+* Handshake protocol
+* Change cipher spec protocol
+* Alert protocol
+* Application data protocol
+
 NOTE:
 * OSI layer dichotomy (Data + Control).
 * OSI layer isn't so strict.
@@ -47,6 +53,7 @@ Terminology:
 ### Cipher suites
 
 https://en.wikipedia.org/wiki/Cipher_suite#Supported_algorithms
+https://ciphersuite.info/
 
 ### TLS 1.3 caveat
 
@@ -255,3 +262,18 @@ Appendix 2: Self study
 * Convert the TLS handshake to a state machine diagram.
 * Research on low computation invertibility `pow(g, x) mod m`.
 * Memorise terminology and parameters.
+* Open point - Utility of random number passed (replay attacks).
+* Advanced - Write a MTM application hack our current client server handshake.
+
+
+Appendix 3: TODO TLS networking related
+--------------------------------------------
+* Record fragmentation
+* Record compression decompression
+
+Appendix 3: TODO TLS security theoretical
+---------------------------------------
+* Payload protection
+* Key generation
+
+
