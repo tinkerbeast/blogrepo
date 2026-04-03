@@ -7,8 +7,8 @@ https://chris.beams.io/posts/git-commit/
 
 If you are commiting more than one idea (each idea can be capture by the subject line), then separate out the commits.
 
-### Baisc format
-
+### Basic format
+```
 Subject line // 50 chars or less, avoid markdown, don't end with full-stop, must start with capital letter
 // empty line
 More detailed explanatory text, if necessary. Wrap it to about 72 // body lines, 72 chars or less
@@ -16,7 +16,7 @@ characters or so. In some contexts, the first line is treated as the // can have
 subject of the commit and the rest of the text as the body. The
 blank line separating the summary from the body is critical (unless
 you omit the body entirely); various tools like `log
-
+```
 
 Resolves: #123         // issue tracker references at bottom
 See also: #456, #789
